@@ -1,4 +1,4 @@
-
+%%writefile app.py
 import streamlit as st
 import pandas as pd
 import joblib
@@ -29,13 +29,6 @@ st.markdown("""
     font-size: 2rem;
     font-weight: bold;
     color: #FF4B4B;
-}
-.help-box {
-    background-color: #e3f2fd;
-    padding: 1rem;
-    border-radius: 5px;
-    border-left: 4px solid #2196F3;
-    margin: 1rem 0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -92,23 +85,28 @@ with col1:
 
     age = st.slider("👤 Delivery Age", 18, 60, preset["age"])
     rating = st.slider("⭐ Rating", 1.0, 5.0, preset["rating"], 0.1)
-    multiple = st.selectbox("📦 Multiple Deliveries", [0, 1, 2, 3], preset["multiple"])
 
-    weather = st.selectbox("🌦 Weather", list(label_encoders["Weatherconditions"].classes_))
-    traffic = st.selectbox("🚦 Traffic", list(label_encoders["Road_traffic_density"].classes_))
-    order_type = st.selectbox("🍽 Order Type", list(label_encoders["Type_of_order"].classes_))
-    vehicle = st.selectbox("🛵 Vehicle", list(label_encoders["Type_of_vehicle"].classes_))
-    city = st.selectbox("🏙 City", list(label_encoders["City"].classes_))
-    festival = st.selectbox("🎊 Festival", list(label_encoders["Festival"].classes_))
+    multiple = st.selectbox(
+        "📦 Multiple Deliveries",
+        [0, 1, 2, 3],
+        index=[0, 1, 2, 3].index(preset["multiple"])
+    )
+
+    weather = st.selectbox("🌦 Weather", label_encoders["Weatherconditions"].classes_)
+    traffic = st.selectbox("🚦 Traffic", label_encoders["Road_traffic_density"].classes_)
+    order_type = st.selectbox("🍽 Order Type", label_encoders["Type_of_order"].classes_)
+    vehicle = st.selectbox("🛵 Vehicle", label_encoders["Type_of_vehicle"].classes_)
+    city = st.selectbox("🏙 City", label_encoders["City"].classes_)
+    festival = st.selectbox("🎊 Festival", label_encoders["Festival"].classes_)
 
 # ===================== INFO PANEL =====================
 with col2:
     st.subheader("📊 Quick Info")
-
     st.success("🔥 Peak Hour" if is_peak else "✅ Off Peak")
 
     traffic_emoji = {"Low": "🟢", "Medium": "🟡", "High": "🟠", "Jam": "🔴"}
-    st.info(f"🚦 {traffic_emoji.get(traffic, '⚪')} {traffic}")
+    traffic_clean = str(traffic).strip().title()
+    st.info(f"🚦 {traffic_emoji.get(traffic_clean, '⚪')} {traffic_clean}")
 
 # ===================== PREDICTION =====================
 st.divider()
@@ -134,18 +132,18 @@ if st.button("🔮 Predict Delivery Time", type="primary", use_container_width=T
         prediction = model.predict(input_df)[0]
 
         st.balloons()
-        st.markdown(f"<div class='prediction-box'>⏱ {prediction:.0f} minutes</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='prediction-box'>⏱ {prediction:.0f} minutes</div>",
+            unsafe_allow_html=True
+        )
 
         arrival = datetime.now() + pd.to_timedelta(prediction, unit="m")
         st.info(f"🕐 Estimated Arrival: {arrival.strftime('%I:%M %p')}")
 
     except Exception as e:
-        st.error("Prediction failed")
+        st.error("❌ Prediction failed")
         st.code(str(e))
 
 # ===================== FOOTER =====================
 st.divider()
-st.markdown(
-    "<center>🤖 XGBoost ML Model • Built with Streamlit</center>",
-    unsafe_allow_html=True
-)
+st.markdown("<center>🤖 XGBoost ML Model • Built with Streamlit</center>", unsafe_allow_html=True)
