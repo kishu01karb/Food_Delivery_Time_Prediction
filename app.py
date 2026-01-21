@@ -1,4 +1,4 @@
-%%writefile app.py
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -147,3 +147,4 @@ if st.button("🔮 Predict Delivery Time", type="primary", use_container_width=T
 # ===================== FOOTER =====================
 st.divider()
 st.markdown("<center>🤖 XGBoost ML Model • Built with Streamlit</center>", unsafe_allow_html=True)
+
